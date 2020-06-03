@@ -63,10 +63,16 @@ app.get('/info', (request, response) =>{
 app.delete('/api/persons/:id',  (request, response) => {
     const id =  Number(request.params.id);
     const contactIndex = puhelinLuettelo.findIndex(contact => contact.id === id );
+    console.log('contactIndex :>> ', contactIndex);
     console.log('puhelinLuettelo :>> ', puhelinLuettelo);
-    puhelinLuettelo.splice(contactIndex, 1);
-    console.log('puhelinLuettelo :>> ', puhelinLuettelo);
-    response.status(204).end();
+    if (contactIndex>-1) {
+        puhelinLuettelo.splice(contactIndex, 1);
+        console.log('puhelinLuettelo :>> ', puhelinLuettelo);
+        response.status(204).end();
+    } else {
+        console.log('puhelinLuettelo :>> ', puhelinLuettelo);
+        response.status(204).end();
+    }
 })
 
 app.post('/api/persons', (request, response)=>{
