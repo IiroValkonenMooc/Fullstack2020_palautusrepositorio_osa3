@@ -1,7 +1,34 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 app.use(express.json())
+//app.use(morgan('tiny'))
+app.use(morgan(function (tokens, req, res) {
+    //console.log('tokens.method(req, res) :>> ', tokens.method(req, res));
+    //console.log('type :>> ', typeof(tokens.method(req, res)));
+
+    if (tokens.method(req, res)==='POST') {
+        return [
+            tokens.method(req, res),
+            tokens.url(req, res),
+            tokens.status(req, res),
+            tokens.res(req, res, 'content-length'), '-',
+            tokens['response-time'](req, res), 'ms',
+            JSON.stringify(req.body, null)
+          ].join(' ')
+    } else {
+        return [
+            tokens.method(req, res),
+            tokens.url(req, res),
+            tokens.status(req, res),
+            tokens.res(req, res, 'content-length'), '-',
+            tokens['response-time'](req, res), 'ms'
+          ].join(' ')
+    } 
+
+    
+}))
 
 let puhelinLuettelo = [
     {
@@ -99,7 +126,7 @@ app.post('/api/persons', (request, response)=>{
 
     puhelinLuettelo.push(newContact)
 
-    console.log(puhelinLuettelo);
+    //console.log(puhelinLuettelo);
 
     response.json(newContact)
 })
