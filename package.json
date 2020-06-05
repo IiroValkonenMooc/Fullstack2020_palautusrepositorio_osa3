@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:ui": "Remove-Item 'C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3/build' -Recurse && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && npm run build --prod && Copy-Item 'C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo' -Destination 'C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   },
   "homepage": "https://github.com/IiroValkonenMooc/Fullstack2020_palautusrepositorio_osa3#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "morgan": "^1.10.0"
   },
