@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "git push heroku master",
     "clean": "shx rm -r build && shx echo Clean done",
     "copy-build": "cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && shx cp -rf build C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && shx echo copy done",
     "build:ui": "npm run clean && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && npm run build --prod && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && npm run copy-build"
