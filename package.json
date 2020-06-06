@@ -7,7 +7,9 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "Remove-Item 'C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3/build' -Recurse && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && npm run build --prod && Copy-Item 'C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo' -Destination 'C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3"
+    "clean": "shx rm -r build && shx echo Clean done",
+    "copy-build": "cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && shx cp -rf build C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && shx echo copy done",
+    "build:ui": "npm run clean && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && npm run build --prod && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && npm run copy-build"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,7 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "shx": "^0.3.2"
   }
 }
