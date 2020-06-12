@@ -38,6 +38,7 @@ app.use(morgan(function (tokens, req, res) {
     
 }))
 
+/*
 let puhelinLuettelo = [
     {
         "name": "Arto Hellas",
@@ -65,6 +66,7 @@ let puhelinLuettelo = [
         "id": 5
     }
 ]
+*/
 
 const getDateString = () => {
     const weekdays = new Array('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
@@ -80,34 +82,74 @@ const getDateString = () => {
 
 
 app.get('/api/persons', (request, response) => {
-    response.json(puhelinLuettelo)
+    //response.json(puhelinLuettelo)
+
+    Contact.find({}).then( contacts =>{
+        // console.log('contacts type :>> ', typeof(contacts.map(contact => contact.toJSON()) ));
+        //console.log('contacts :>> ', contacts.map(contact => contact.toJSON()) );
+        response.json(contacts);
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id =  Number(request.params.id);
-    const contact = puhelinLuettelo.find(contact => contact.id === id );
-    console.log('contact :>> ', contact);
-    response.json(contact);
+    //const id =  Number(request.params.id);
+    // const contact = puhelinLuettelo.find(contact => contact.id === id );
+    // console.log('contact :>> ', contact);
+    // response.json(contact);
+
+    Contact.findById( request.params.id ).then( result => {
+        if(note){
+            response.json(result)
+        } else {
+            response.status(404).end()
+        }
+    })
+    .catch( error => {
+        console.log(error)
+        response.status(404).end()
+    })
 })
 
 app.get('/info', (request, response) =>{
-    
-    response.send(`<p>Phonebook has info for ${puhelinLuettelo.length} people <br></br> ${getDateString()}</p>`);
+    Contact.find({}).then( contacts =>{
+        response.send(`<p>Phonebook has info for ${contacts.length} people <br></br> ${getDateString()}</p>`);
+    })
 })
 
-app.delete('/api/persons/:id',  (request, response) => {
-    const id =  Number(request.params.id);
-    const contactIndex = puhelinLuettelo.findIndex(contact => contact.id === id );
-    console.log('contactIndex :>> ', contactIndex);
-    console.log('puhelinLuettelo :>> ', puhelinLuettelo);
-    if (contactIndex>-1) {
-        puhelinLuettelo.splice(contactIndex, 1);
-        console.log('puhelinLuettelo :>> ', puhelinLuettelo);
-        response.status(204).end();
-    } else {
-        console.log('puhelinLuettelo :>> ', puhelinLuettelo);
-        response.status(204).end();
+app.delete('/api/persons/:id',  (request, response, next) => {
+    // const id =  Number(request.params.id);
+    // const contactIndex = puhelinLuettelo.findIndex(contact => contact.id === id );
+    // console.log('contactIndex :>> ', contactIndex);
+    // console.log('puhelinLuettelo :>> ', puhelinLuettelo);
+    // if (contactIndex>-1) {
+    //     puhelinLuettelo.splice(contactIndex, 1);
+    //     console.log('puhelinLuettelo :>> ', puhelinLuettelo);
+    //     response.status(204).end();
+    // } else {
+    //     console.log('puhelinLuettelo :>> ', puhelinLuettelo);
+    //     response.status(204).end();
+    // }
+
+    Contact.findByIdAndRemove(request.params.id).then( result =>{
+        response.status(204).end()
+    })
+    .catch( error => next(error) )
+})
+
+app.patch('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const updatedContact = {
+        name: body.name,
+        number: body.number
     }
+    
+    Contact.findByIdAndUpdate(request.params.id, updatedContact, {new: true} )
+        .then( updatedContact => {
+            response.json(updatedContact)
+        })
+        .catch(error => next(error))
+    
 })
 
 app.post('/api/persons', (request, response)=>{
@@ -119,25 +161,37 @@ app.post('/api/persons', (request, response)=>{
         })
     }
 
-    if ( (puhelinLuettelo.find(contact => contact.name ===body.name)) ||
-            (puhelinLuettelo.find(contact => contact.number ===body.number))) {
-        return response.status(403).json({
-            error: 'name or number duplicate'
-        })
-    }
+    // if ( (Contact.find({}).(contact => contact.name ===body.name)) ||
+    //         (puhelinLuettelo.find(contact => contact.number ===body.number))) {
+    //     return response.status(403).json({
+    //         error: 'name or number duplicate'
+    //     })
+    // }
+    //Contact.find({name: body.name}).then( result => {console.log(result.length);} )
 
-    const newContact = {
-        name: body.name,
-        number: body.number,
-        id: Math.round(Math.random()*10000)
-    } 
+    Contact.findOne({ name: body.name }).then(result => {
+        //console.log(result);
 
-    puhelinLuettelo.push(newContact)
+        if (result) {
+            console.log('name duplicate');
+            response.status(403).json({
+                error: 'name or number duplicate'
+            })
+        } else {
+            console.log('not duplicate');
 
-    //console.log(puhelinLuettelo);
+            const newContact = new Contact({
+                name: body.name,
+                number: body.number
+            } )
 
-    response.json(newContact)
+            newContact.save().then( savedContact =>{
+                response.json(savedContact)
+            })
+        }
+    })
 })
+
 
 console.log('Hello world');
 
