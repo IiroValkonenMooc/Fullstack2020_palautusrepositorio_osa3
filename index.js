@@ -24,7 +24,7 @@ app.use(morgan(function (tokens, req, res) {
             tokens.res(req, res, 'content-length'), '-',
             tokens['response-time'](req, res), 'ms',
             JSON.stringify(req.body, null)
-          ].join(' ')
+        ].join(' ')
     } else {
         return [
             tokens.method(req, res),
@@ -32,10 +32,8 @@ app.use(morgan(function (tokens, req, res) {
             tokens.status(req, res),
             tokens.res(req, res, 'content-length'), '-',
             tokens['response-time'](req, res), 'ms'
-          ].join(' ')
-    } 
-
-    
+        ].join(' ')
+    }
 }))
 
 /*
@@ -69,9 +67,9 @@ let puhelinLuettelo = [
 */
 
 const getDateString = () => {
-    const weekdays = new Array('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
-    const months = new Array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
-    const now = new Date();
+    const weekdays = new Array('Sun','Mon','Tue','Wed','Thu','Fri','Sat')
+    const months = new Array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')
+    const now = new Date()
     const currWeekDay = weekdays[now.getDay()]
     const currMonth = months[now.getMonth()]
     const timezonePlusOrMinus = now.getTimezoneOffset() < 0 ? '+' : '-'
@@ -84,12 +82,11 @@ const getDateString = () => {
 app.get('/api/persons', (request, response, next) => {
     //response.json(puhelinLuettelo)
 
-    Contact.find({}).then( contacts =>{
+    Contact.find({}).then( contacts => {
         // console.log('contacts type :>> ', typeof(contacts.map(contact => contact.toJSON()) ));
         //console.log('contacts :>> ', contacts.map(contact => contact.toJSON()) );
-        response.json(contacts);
-    })
-    .catch( error => next(error) )
+        response.json(contacts)
+    }).catch( error => next(error) )
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -104,15 +101,13 @@ app.get('/api/persons/:id', (request, response, next) => {
         } else {
             response.status(404).end()
         }
-    })
-    .catch( error => next(error) )
+    }).catch( error => next(error) )
 })
 
-app.get('/info', (request, response) =>{
-    Contact.find({}).then( contacts =>{
-        response.send(`<p>Phonebook has info for ${contacts.length} people <br></br> ${getDateString()}</p>`);
-    })
-    .catch( error => next(error) )
+app.get('/info', (request, response, next) => {
+    Contact.find({}).then( contacts => {
+        response.send(`<p>Phonebook has info for ${contacts.length} people <br></br> ${getDateString()}</p>`)
+    }).catch( error => next(error) )
 })
 
 app.delete('/api/persons/:id',  (request, response, next) => {
@@ -129,10 +124,9 @@ app.delete('/api/persons/:id',  (request, response, next) => {
     //     response.status(204).end();
     // }
 
-    Contact.findByIdAndRemove(request.params.id).then( result =>{
+    Contact.findByIdAndRemove(request.params.id).then( result => {
         response.status(204).end()
-    })
-    .catch( error => next(error) )
+    }).catch( error => next(error) )
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -142,13 +136,13 @@ app.put('/api/persons/:id', (request, response, next) => {
         name: body.name,
         number: body.number
     }
-    
-    Contact.findByIdAndUpdate(request.params.id, updatedContact, {new: true} )
+
+    Contact.findByIdAndUpdate(request.params.id, updatedContact, { new: true } )
         .then( updatedContact => {
             response.json(updatedContact)
         })
         .catch(error => next(error))
-    
+
 })
 
 app.patch('/api/persons/:id', (request, response, next) => {
@@ -158,16 +152,16 @@ app.patch('/api/persons/:id', (request, response, next) => {
         name: body.name,
         number: body.number
     }
-    
-    Contact.findByIdAndUpdate(request.params.id, updatedContact, {new: true} )
+
+    Contact.findByIdAndUpdate(request.params.id, updatedContact, { new: true } )
         .then( updatedContact => {
             response.json(updatedContact)
         })
         .catch(error => next(error))
-    
+
 })
 
-app.post('/api/persons', (request, response, next )=>{
+app.post('/api/persons', (request, response, next ) => {
     const body = request.body
 
     if (!(body.name)||!(body.number)) {
@@ -181,10 +175,9 @@ app.post('/api/persons', (request, response, next )=>{
         number: body.number
     } )
 
-    newContact.save().then( savedContact =>{
+    newContact.save().then( savedContact => {
         response.json(savedContact)
-    })
-    .catch(error => {
+    }).catch(error => {
         next(error)
     })
 
@@ -228,21 +221,21 @@ app.use(unknownEndpoint)
 //Virheen käsittelijät
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
-  
+
     if (error.name === 'CastError') {
-      return response.status(400).send({ error: 'malformatted id' })
+        return response.status(400).send({ error: 'malformatted id' })
     }else if (error.name === 'ValidationError') {
         return response.status(400).json({ error: error.message })
     }
-  
+
     next(error)
-  }
-  
+}
+
 app.use(errorHandler)
 
-console.log('Hello world');
+console.log('Hello world')
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+    console.log(`Server running on port ${PORT}`)
 })
