@@ -10,7 +10,8 @@
     "deploy": "git push heroku master",
     "clean": "shx rm -r build && shx echo Clean done",
     "copy-build": "cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && shx cp -rf build C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && shx echo copy done",
-    "build:ui": "npm run clean && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && npm run build --prod && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && npm run copy-build"
+    "build:ui": "npm run clean && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio/osa2/puhelinluettelo && npm run build --prod && cd C:/Users/valko/Documents/Fullstack2020_palautusrepositorio_osa3 && npm run copy-build",
+    "logs:prod": "heroku logs --tail"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "mongoose": "^5.9.18",
+    "mongoose-unique-validator": "^2.0.3",
     "morgan": "^1.10.0"
   },
   "devDependencies": {

@@ -1,4 +1,10 @@
 const mongoose = require('mongoose')
+const uniqueValidator = require('mongoose-unique-validator');
+
+//PATCH errorin korjaus
+mongoose.set('useFindAndModify', false);
+//Unique validaattorin aihettuan virheen korjaus
+mongoose.set('useCreateIndex', true);
 
 const url = process.env.MONGODB_URI
 
@@ -13,9 +19,19 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
   })
 
 const contactSchema = new mongoose.Schema({
-    name: String,
-    number: String,
+    name: {
+      type: String,
+      minlength: 3,
+      required: true,
+      unique: true 
+    },
+    number: {
+      type: String,
+      minlength: 8,
+      required: true
+    },
 })
+contactSchema.plugin(uniqueValidator)
 
 contactSchema.set('toJSON', {
     transform: (document, returnedObject) => {
@@ -23,10 +39,6 @@ contactSchema.set('toJSON', {
       delete returnedObject._id
       delete returnedObject.__v
     }
-})
-
-contactSchema.set('toClient',{
-
 })
 
 module.exports = mongoose.model('Contact', contactSchema);

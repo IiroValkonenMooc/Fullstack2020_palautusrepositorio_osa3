@@ -81,7 +81,7 @@ const getDateString = () => {
 }
 
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
     //response.json(puhelinLuettelo)
 
     Contact.find({}).then( contacts =>{
@@ -89,31 +89,30 @@ app.get('/api/persons', (request, response) => {
         //console.log('contacts :>> ', contacts.map(contact => contact.toJSON()) );
         response.json(contacts);
     })
+    .catch( error => next(error) )
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
     //const id =  Number(request.params.id);
     // const contact = puhelinLuettelo.find(contact => contact.id === id );
     // console.log('contact :>> ', contact);
     // response.json(contact);
 
-    Contact.findById( request.params.id ).then( result => {
-        if(note){
-            response.json(result)
+    Contact.findById( request.params.id ).then( contact => {
+        if(contact){
+            response.json(contact)
         } else {
             response.status(404).end()
         }
     })
-    .catch( error => {
-        console.log(error)
-        response.status(404).end()
-    })
+    .catch( error => next(error) )
 })
 
 app.get('/info', (request, response) =>{
     Contact.find({}).then( contacts =>{
         response.send(`<p>Phonebook has info for ${contacts.length} people <br></br> ${getDateString()}</p>`);
     })
+    .catch( error => next(error) )
 })
 
 app.delete('/api/persons/:id',  (request, response, next) => {
@@ -136,6 +135,22 @@ app.delete('/api/persons/:id',  (request, response, next) => {
     .catch( error => next(error) )
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const updatedContact = {
+        name: body.name,
+        number: body.number
+    }
+    
+    Contact.findByIdAndUpdate(request.params.id, updatedContact, {new: true} )
+        .then( updatedContact => {
+            response.json(updatedContact)
+        })
+        .catch(error => next(error))
+    
+})
+
 app.patch('/api/persons/:id', (request, response, next) => {
     const body = request.body
 
@@ -152,7 +167,7 @@ app.patch('/api/persons/:id', (request, response, next) => {
     
 })
 
-app.post('/api/persons', (request, response)=>{
+app.post('/api/persons', (request, response, next )=>{
     const body = request.body
 
     if (!(body.name)||!(body.number)) {
@@ -160,6 +175,18 @@ app.post('/api/persons', (request, response)=>{
             error: 'name or number missing'
         })
     }
+
+    const newContact = new Contact({
+        name: body.name,
+        number: body.number
+    } )
+
+    newContact.save().then( savedContact =>{
+        response.json(savedContact)
+    })
+    .catch(error => {
+        next(error)
+    })
 
     // if ( (Contact.find({}).(contact => contact.name ===body.name)) ||
     //         (puhelinLuettelo.find(contact => contact.number ===body.number))) {
@@ -169,29 +196,49 @@ app.post('/api/persons', (request, response)=>{
     // }
     //Contact.find({name: body.name}).then( result => {console.log(result.length);} )
 
-    Contact.findOne({ name: body.name }).then(result => {
-        //console.log(result);
+    // Contact.findOne({ name: body.name }).then(result => {
+    //     //console.log(result);
 
-        if (result) {
-            console.log('name duplicate');
-            response.status(403).json({
-                error: 'name or number duplicate'
-            })
-        } else {
-            console.log('not duplicate');
+    //     if (result) {
+    //         console.log('name duplicate');
+    //         response.status(403).json({
+    //             error: 'name or number duplicate'
+    //         })
+    //     } else {
+    //         console.log('not duplicate');
 
-            const newContact = new Contact({
-                name: body.name,
-                number: body.number
-            } )
+    //         const newContact = new Contact({
+    //             name: body.name,
+    //             number: body.number
+    //         } )
 
-            newContact.save().then( savedContact =>{
-                response.json(savedContact)
-            })
-        }
-    })
+    //         newContact.save().then( savedContact =>{
+    //             response.json(savedContact)
+    //         })
+    //     }
+    // })
 })
 
+//Olemattomien osoitteiden käsittejä
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+app.use(unknownEndpoint)
+
+//Virheen käsittelijät
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    }else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    }
+  
+    next(error)
+  }
+  
+app.use(errorHandler)
 
 console.log('Hello world');
 
